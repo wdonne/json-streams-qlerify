@@ -1,0 +1,8 @@
+/target
+/.idea/
+/.zed/
+/out/
+/*.iml
+Cargo.lock
+build
+jreleaser.yml

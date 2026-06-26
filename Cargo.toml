@@ -1,0 +1,24 @@
+[package]
+name = "json-streams-qlerify"
+version = "0.1.0"
+edition = "2024"
+description = "CLI to generate JSON Streams apps and OpenAPI specs from qlerify"
+homepage = "https://github.com/wdonne/json-streams-qlerify"
+repository = "https://github.com/wdonne/json-streams-qlerify"
+license = "BSD-2-Clause"
+readme = "README.md"
+keywords = ["cli", "qlerify", "json-streams"]
+exclude = ["*.iml"]
+
+[dependencies]
+clap= {version = "4.6.1", features = ["derive"]}
+log = "0.4.33"
+stderrlog = "0.6.0"
+immutable-json = "1.2.0"
+imbl = "7.0.0"
+imbl-util = "1.0.0"
+iter-util= "1.0.0"
+thiserror = "2.0.18"
+serde_yaml = "0.9.34+deprecated"
+serde_json = "1.0.150"
+generic-builders = "1.0.0"
