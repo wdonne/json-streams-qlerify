@@ -1,6 +1,6 @@
 [package]
 name = "json-streams-qlerify"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 description = "CLI to generate JSON Streams apps and OpenAPI specs from qlerify"
 homepage = "https://github.com/wdonne/json-streams-qlerify"

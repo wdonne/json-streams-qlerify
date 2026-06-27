@@ -1,6 +1,6 @@
 use crate::{
     AppArgs,
-    common::{get_file, read_json, to_yaml, write_yaml},
+    common::{get_file, path, read_json, to_yaml, write_yaml},
     error::ToolError,
     model::{Aggregate, App, Field, Related, SchemaObject, extract, verify_fields},
 };
@@ -9,7 +9,6 @@ use imbl::Vector;
 use imbl_util::vector::{append, push_back};
 use immutable_json::{api::Value, array::Array, object::Object};
 use iter_util::fold_result::FoldResultExt;
-use std::fs::File;
 use std::io::Write;
 use std::path::Path;
 
@@ -66,6 +65,7 @@ fn create_aggregate(
         &Value::Object(generated),
         &mut get_file(directory, &filename)?,
     )?;
+
     Ok(filename)
 }
 
@@ -83,16 +83,15 @@ fn create_command(
     mock_mode: bool,
 ) -> Result<(String, Object), ToolError> {
     let reducer_filename = "reducers/".to_string() + &command.name + ".jq";
-    let mut reducer_file = get_file(directory, &reducer_filename)?;
     let validator_filename = "validators/".to_string() + &command.name + ".yaml";
-    let mut validator_file = get_file(directory, &validator_filename)?;
 
-    if mock_mode || file_length(&reducer_file)? == 0 {
-        reducer_file.write_all(REDUCER.as_bytes())?;
+    if mock_mode || !path(directory, &reducer_filename).exists() {
+        get_file(directory, &reducer_filename)?.write_all(REDUCER.as_bytes())?;
     }
 
-    if mock_mode || file_length(&validator_file)? == 0 {
-        validator_file.write_all(create_validator(command, app)?.as_bytes())?;
+    if mock_mode || !path(directory, &validator_filename).exists() {
+        get_file(directory, &validator_filename)?
+            .write_all(create_validator(command, app)?.as_bytes())?;
     }
 
     Ok((
@@ -140,7 +139,7 @@ fn create_field_conditions(app: &App, field: &Field) -> Vector<Object> {
         )
         .update_if(
             |_| field.related.is_some() && field.data_type != "array",
-            |v| append(&v, &create_sub_field_conditions(app, &field)),
+            |v| append(&v, &create_sub_field_conditions(app, field)),
         )
         .build()
 }
@@ -166,10 +165,6 @@ fn create_validator(command: &SchemaObject, app: &App) -> Result<String, ToolErr
     ))
 }
 
-fn file_length(file: &File) -> Result<u64, ToolError> {
-    Ok(file.metadata()?.len())
-}
-
 pub(crate) fn generate(args: &AppArgs) -> Result<(), ToolError> {
     let app = extract(&read_json(&args.file)?)?;
 
@@ -186,10 +181,12 @@ pub(crate) fn generate(args: &AppArgs) -> Result<(), ToolError> {
                 .add_string("extra-parts.yaml"),
         );
 
-    write_yaml(
-        &Value::Array(Array::new()),
-        &mut get_file(&args.directory, "extra-parts.yaml")?,
-    )?;
+    if !path(&args.directory, "extra-parts.yaml").exists() {
+        write_yaml(
+            &Value::Array(Array::new()),
+            &mut get_file(&args.directory, "extra-parts.yaml")?,
+        )?;
+    }
 
     write_yaml(
         &Value::Object(generated),

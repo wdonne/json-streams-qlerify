@@ -31,7 +31,7 @@ pub(crate) fn get_file(directory: &Path, filename: &str) -> Result<File, ToolErr
     }
 }
 
-fn path(directory: &Path, filename: &str) -> PathBuf {
+pub(crate) fn path(directory: &Path, filename: &str) -> PathBuf {
     let mut path = PathBuf::from(directory);
 
     path.push(filename);
